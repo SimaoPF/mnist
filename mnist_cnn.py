@@ -17,9 +17,9 @@ import time
 
 batch_size = 128
 num_classes = 10
-epochs = 12
+epochs = 8
 str_name = 'Mnist_gen_mod1_Adam_'+ time.asctime()
-epoch_iterations = 500
+epoch_iterations = 100
 
 # input image dimensions
 img_rows, img_cols = 28, 28
@@ -54,9 +54,6 @@ Igen.fit(x_train, augment=True)
 xy_gen_t =Igen.flow(x_train,y_train,batch_size=batch_size,seed=1,subset="training")                          
 xy_gen_v =Igen.flow(x_train,y_train,batch_size=batch_size/4,seed=1,subset="validation")                          
 
-print(xy_gen_t.__getattribute__.__sizeof__,' whole size?')
-print(xy_gen_t.batch_size,' batch size')
-
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(3, 3),
                  activation='relu',
@@ -71,12 +68,17 @@ model.add(Flatten())
 model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(num_classes))
-model.add(Activation('softmax'))
-
-model.compile(loss=keras.losses.categorical_crossentropy,
+model.add(Activation('tanh'))
+#
+#model.compile(loss=keras.losses.categorical_crossentropy,
+#              optimizer=keras.optimizers.Adam(),
+#              metrics=['accuracy','mae']);
+model.compile(loss=keras.losses.binary_crossentropy,
               optimizer=keras.optimizers.Adam(),
-              metrics=['accuracy'])
-
+              metrics=[keras.metrics.binary_accuracy,
+                       keras.metrics.binary_crossentropy,
+                       keras.metrics.categorical_accuracy]);
+              
 plot_model(model, to_file='model.png',show_shapes=True)
 saver = callbacks.ModelCheckpoint('/home/sfaria/Python/mnist_models/'+str_name+ '_mnistMODEL.h5', monitor='loss', verbose=1, save_best_only=True, save_weights_only=True, mode='auto', period=1)    
 
